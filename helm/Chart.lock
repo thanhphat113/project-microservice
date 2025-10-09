@@ -1,0 +1,18 @@
+dependencies:
+- name: identity-service
+  repository: file://charts/IdentityService
+  version: 1.0.0
+- name: task-service
+  repository: file://charts/TaskService
+  version: 1.0.0
+- name: api-gateway
+  repository: file://charts/ApiGateway
+  version: 1.0.0
+- name: frontend
+  repository: file://charts/Frontend
+  version: 1.0.0
+- name: hashicorp-vault
+  repository: file://charts/Vault
+  version: 1.0.0
+digest: sha256:739541e610fd37cd2e10e9597e5d995cafee09e521d8a0258e867c2cbc6e1390
+generated: "2025-10-09T14:06:02.291529+07:00"

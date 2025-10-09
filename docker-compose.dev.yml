@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+  gatewayservice:
+    build:
+      context: ./Apps/Backend/ApiGateway
+      dockerfile: Dockerfile
+      target: build
+    container_name: gateway_container
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_URLS=http://+:${GATEWAY_URLS}
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_URLS}"
+    command: "dotnet watch run --urls http://+:${GATEWAY_URLS}"
+    volumes:
+      - "./Apps/Backend/ApiGateway:/src"
+
+  sqlservice:
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: sqlserver_container
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SQLSERVER_PASSWORD}
+    ports:
+      - "${SQLSERVER_PORT}:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  authservice:
+    build:
+      context: ./Apps/Backend/IdentityService
+      dockerfile: Dockerfile
+      target: build
+    container_name: auth_container
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENV=Development
+      - ASPNETCORE_URLS=http://+:${IDENTITY_URLS}
+      - ConnectionStrings__Default=Server=${SQLSERVER_SERVER},1433;Database=${SQLSERVER_DATABASE};User Id=${SQLSERVER_USER};Password=${SQLSERVER_PASSWORD};TrustServerCertificate=True;
+    ports:
+      - "${IDENTITY_PORT}:${IDENTITY_URLS}"
+    depends_on:
+      - sqlservice
+    command: "dotnet watch run --urls http://+:${IDENTITY_URLS}"
+    volumes:
+      - "./Apps/Backend/IdentityService:/src"
+
+  taskservice:
+    build:
+      context: ./Apps/Backend/TaskService
+      dockerfile: Dockerfile
+      target: build
+    container_name: task_container
+    env_file:
+      - .env
+    environment:
+      - TYPE_LOG=${TYPE_LOG}
+      - TASK_URLS=${TASK_URLS}
+      - POSTGRESQL_SERVER=${POSTGRESQL_SERVER}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+    ports:
+      - "${TASK_PORT}:${TASK_URLS}"
+    depends_on:
+      - postgresservice
+    command: "mvn spring-boot:run"
+    volumes:
+      - "./Apps/Backend/TaskService/src:/src/src"
+
+  postgresservice:
+    image: postgres:15
+    container_name: postgres_container
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${POSTGRESQL_DATABASE}
+      - POSTGRES_USER=${POSTGRESQL_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+    ports:
+      - "${POSTGRESQL_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  frontend_service:
+    build:
+      context: ../Apps/Frontend/Todo-frontend
+      dockerfile: Dockerfile
+      target: build
+    container_name: frontend_container
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_URLS}"
+    depends_on:
+      - gatewayservice
+    command: "npm run dev"
+    volumes:
+      - "./Apps/Frontend/Todo-frontend:/src"
+      # 2. THÊM VOLUME ẨN DANH NÀY 👇
+      # Nó ghi đè thư mục node_modules trên máy host bằng một thư mục trống bên trong container
+      - /src/node_modules
+
+volumes:
+  sql_data:
+  postgres_data:

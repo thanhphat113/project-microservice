@@ -1,0 +1,23 @@
+replicaCount: 3
+
+image:
+  repository: thanhphat0/api-gateway
+  tag: "1.0.0"
+
+service:
+  type: ClusterIP
+  urls: 9000
+  port: 9000
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+env:
+  - name: ASPNETCORE_URLS
+    value: "http://+:9000"
+

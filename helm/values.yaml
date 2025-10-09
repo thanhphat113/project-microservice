@@ -1,0 +1,33 @@
+global:
+  namespace: todo-list-stag
+  enviroment: staging
+  defaultReplicaCount: 3
+
+monitoring:
+  enabled: true
+
+identityService:
+  enabled: false
+
+taskService:
+  enabled: false
+
+apiGateway:
+  enabled: true
+
+vault:
+  enabled: false
+  # replicaCount: 3 
+
+frontend:
+  enabled: false
+  replicaCount: 3 
+
+  image:
+    repository: thanhphat0/identity-service
+    tag: 1.0.0
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi

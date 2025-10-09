@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.7/.schema/devbox.schema.json",
+  "packages": [
+    "docker@latest",
+    "docker-compose@latest",
+    "kubectl@latest",
+    "kubernetes-helm@latest",
+    "k9s@latest",
+    "yq-go@latest",
+    "jq@latest",
+    "oras@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo '🚀 Dev environment ready: Docker + Helm + Kubernetes'",
+      "kubectl version --client --short",
+      "helm version --short"
+    ],
+    "aliases": {
+      "up": "docker compose -f docker-compose.dev.yml up -d",
+      "down": "docker compose -f docker-compose.dev.yml down",
+      "pods": "kubectl get pods -A",
+      "ctx": "kubectl config current-context",
+      "helm-list": "helm list -A"
+    }
+  }
+}
