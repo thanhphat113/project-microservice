@@ -8,7 +8,8 @@
     "k9s@latest",
     "yq-go@latest",
     "jq@latest",
-    "oras@latest"
+    "oras@latest",
+    "terraform@latest"
   ],
   "shell": {
     "init_hook": [
