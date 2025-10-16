@@ -19,6 +19,8 @@ jobs:
         id: set_env
         run: |
           BRANCH=${GITHUB_REF##*/}
+          echo "BR=$BRANCH" >> $GITHUB_ENV
+          
           if [[ "$BRANCH" == "stag" ]]; then
             echo "ENV=stag" >> $GITHUB_ENV
             echo "DIR=staging" >> $GITHUB_ENV
