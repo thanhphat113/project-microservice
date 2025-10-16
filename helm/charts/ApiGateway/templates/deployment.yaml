@@ -18,14 +18,16 @@ spec:
       containers:
         - name: api-gateway
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.service.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.urls }}
           env:
             {{- range .Values.env}}
-              - name: {{.name}}
-                value: {{.value | quote}}
+            - name: {{.name}}
+              value: {{.value | quote}}
             {{- end}}
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{.Values.global.env | quote}}
           resources:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}

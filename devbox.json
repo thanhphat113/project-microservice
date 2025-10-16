@@ -9,7 +9,8 @@
     "yq-go@latest",
     "jq@latest",
     "oras@latest",
-    "terraform@latest"
+    "terraform@latest",
+    "minikube@latest"
   ],
   "shell": {
     "init_hook": [

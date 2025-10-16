@@ -1,3 +1,4 @@
+---
 apiVersion: v2
 name: todo-list-app
 description: A Helm chart for deploying the entire Todo App Microservice suite.
@@ -5,32 +6,17 @@ type: application
 version: 1.0.0
 
 dependencies:
-    # 1. IdentityService Chart
-    - name: identity-service
-      version: 1.0.0
-      repository: "file://charts/IdentityService"
-      condition: identityService.enabled 
+# 1. IdentityService Chart
+- name: identity-service
+  version: 1.0.0
+  repository: "file://charts/identityService"
 
-    # 2. TaskService Chart
-    - name: task-service
-      version: 1.0.0
-      repository: "file://charts/TaskService"
-      condition: taskService.enabled
+# 2. TaskService Chart
+- name: task-service
+  version: 1.0.0
+  repository: "file://charts/taskService"
 
-    # 3. ApiGateway Chart
-    - name: api-gateway
-      version: 1.0.0
-      repository: "file://charts/ApiGateway"
-      condition: apiGateway.enabled
-
-    # 4. Frontend Chart
-    - name: frontend
-      version: 1.0.0
-      repository: "file://charts/Frontend"
-      condition: frontend.enabled
-    
-    # 5. Hashicorp Vaults
-    - name: hashicorp-vault
-      version: 1.0.0
-      repository: "file://charts/Vault"
-      condition: vault.enabled
+# 3. ApiGateway Chart
+- name: api-gateway
+  version: 1.0.0
+  repository: "file://charts/apiGateway"

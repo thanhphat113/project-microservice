@@ -1,13 +1,18 @@
-replicaCount: 3
-
 image:
   repository: thanhphat0/api-gateway
   tag: "1.0.0"
 
 service:
-  type: ClusterIP
+  name: apigateway
+  type: LoadBalancer
   urls: 9000
-  port: 9000
+  port: 443
+  image:
+    pullPolicy: Always
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:ap-southeast-1:148327435626:certificate/af39b725-226d-4d3c-8b53-f637e55f51fc"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
 
 resources:
   limits:
@@ -18,6 +23,7 @@ resources:
     memory: "256Mi"
 
 env:
-  - name: ASPNETCORE_URLS
-    value: "http://+:9000"
-
+- name: ASPNETCORE_URLS
+  value: "http://+:9000"
+- name: FRONTEND_URLS
+  value: "https://www.todolist.x10.network"
