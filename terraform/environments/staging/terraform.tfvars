@@ -28,7 +28,5 @@ min_capacity     = 1
 
 origin_path = "/dist"
 
-aws_profile = "staging"
-
 project    = "todolist"
 aws_region = "ap-southeast-1"
