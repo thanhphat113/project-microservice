@@ -81,7 +81,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.DIR}}-tf-output
+          name: ${{env.ENV}}-tf-output
           path: ./terraform/environments/${{env.DIR}}/${{env.ENV}}-terraform-output.json
 
   helm:
