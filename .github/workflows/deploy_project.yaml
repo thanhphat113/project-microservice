@@ -9,6 +9,8 @@ on:
 jobs:
   terraform:
     name: "Run terraform for ${{matrix.environment}}"
+    env:
+      TF_API_TOKEN: ${{ secrets.TERRAFORM_TOKEN }}
     runs-on: ubuntu-latest
 
     steps:
@@ -38,11 +40,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           working-directory: ./terraform
-
-      - name: Set Terraform Cloud Token
-        run: |
-          echo "TFE_TOKEN=${{ secrets.TERRAFORM_TOKEN }}" >> $GITHUB_ENV
-        shell: bash
 
       - name: Terraform init
         run: terraform init
