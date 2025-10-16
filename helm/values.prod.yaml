@@ -1,0 +1,8 @@
+api-gateway:
+  replicaCount: 3
+
+identity-service:
+  replicaCount: 3
+
+task-service:
+  replicaCount: 3

@@ -50,7 +50,7 @@ namespace IdentityService.Services
                 var hasher = new PasswordHasher<Account>();
 
                 var currentAccount = await _context.Accounts
-                    .FirstOrDefaultAsync(a => EF.Functions.Collate(a.Identify, "Latin1_General_CS_AS") == item.Identify);
+                    .FirstOrDefaultAsync(a => EF.Functions.Collate(a.Identify, "utf8mb4_bin") == item.Identify);
                 if (currentAccount == null)
                     return ServiceResult<User>.Fail($"Tên đăng nhập không hợp lệ");
 

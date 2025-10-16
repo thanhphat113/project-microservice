@@ -17,10 +17,12 @@ namespace IdentityService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("utf8mb4_0900_ai_ci")
                 .HasAnnotation("ProductVersion", "9.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.HasCharSet(modelBuilder, "utf8mb4");
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("IdentityService.Models.Account", b =>
                 {
@@ -28,48 +30,35 @@ namespace IdentityService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("AccountId"));
 
                     b.Property<string>("Identify")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("AccountId")
-                        .HasName("PK__Account__349DA5A6BAD6BD3F");
+                        .HasName("PRIMARY");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Account_UserId");
 
                     b.HasIndex(new[] { "AccountId" }, "UQ__Account__349DA5A7AEAE707B")
                         .IsUnique();
 
                     b.ToTable("Account", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            AccountId = 1,
-                            Identify = "demo@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJnHg+CIGqb8SRQcT9MpZbU11FyRYuyxzTJkDEHG9mG6rkmAaDkODwYOCVbiW+kxyw==",
-                            Provider = "Local",
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("IdentityService.Models.RefreshToken", b =>
@@ -78,32 +67,31 @@ namespace IdentityService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TokenId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TokenId"));
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime");
 
                     b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("TokenId")
-                        .HasName("PK__tmp_ms_x__658FEEEABAD99E56");
+                        .HasName("PRIMARY");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_RefreshToken_UserId");
 
                     b.HasIndex(new[] { "TokenId" }, "UQ__tmp_ms_x__658FEEEB8DC1D79C")
                         .IsUnique();
@@ -117,32 +105,23 @@ namespace IdentityService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Email")
                         .HasMaxLength(255)
-                        .IsUnicode(false)
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("UserId")
-                        .HasName("PK__User__1788CC4CC3195CA0");
+                        .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "UserId" }, "UQ__User__1788CC4D882CE5A2")
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            Email = "demo@gmail.com",
-                            Name = "Demo"
-                        });
                 });
 
             modelBuilder.Entity("IdentityService.Models.Account", b =>

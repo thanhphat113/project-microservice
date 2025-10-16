@@ -1,0 +1,148 @@
+name: CI/CD todolist
+
+on:
+  push:
+    branches:
+      - stag
+      - main
+
+jobs:
+  terraform:
+    name: "Run terraform for ${{matrix.environment}}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        id: set_env
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "stag" ]]; then
+            echo "ENV=stag" >> $GITHUB_ENV
+            echo "DIR=staging" >> $GITHUB_ENV
+          else
+            echo "ENV=main" >> $GITHUB_ENV
+            echo "DIR=production" >> $GITHUB_ENV
+          fi
+
+      - name: Configure AWS credenticals
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets[format('AWS_ACCESS_KEY_ID_{0}', env.ENV)]  }}
+          aws-secret-access-key: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_{0}', env.ENV)]  }}
+          aws-region: ap-southeast-1
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          working-directory: ./terraform
+
+      - name: Terraform init
+        run: terraform init
+        working-directory: ./terraform/environments/${{env.DIR}}
+
+      - name: Export variables
+        run: |
+          echo "TF_VAR_db_password_task_service=${{secrets.DB_PASSWORD_TASK_SERVICE}}" >> $GITHUB_ENV
+          echo "TF_VAR_db_password_identity_service=${{secrets.DB_PASSWORD_IDENTITY_SERVICE}}" >> $GITHUB_ENV
+          echo "TF_VAR_db_username_task_service=${{secrets.DB_USERNAME_TASK_SERVICE}}" >> $GITHUB_ENV
+          echo "TF_VAR_db_username_identity_service=${{secrets.DB_USERNAME_IDENTITY_SERVICE}}" >> $GITHUB_ENV
+          echo "TF_VAR_create_certificate_for_domain=true" >> $GITHUB_ENV
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -no-color > plan_output.txt
+        working-directory: ./terraform/environments/${{env.DIR}}
+        continue-on-error: true
+
+      - name: Check plan changes
+        id: check_plan
+        run: |
+          if grep -q "No changes. Your infrastructure matches the configuration." plan_output.txt; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ./terraform/environments/${{env.DIR}}
+
+      - name: Terraform apply
+        if: steps.check_plan.outputs.has_changes == 'true'
+        run: terraform apply --auto-approve
+        working-directory: ./terraform/environments/${{env.DIR}}
+
+      - name: Save terraform ouputs
+        id: output
+        run: terraform output -json > ${{env.ENV}}-terraform-output.json
+        working-directory: ./terraform/environments/${{env.DIR}}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{env.DIR}}-tf-output
+          path: ./terraform/environments/${{env.DIR}}/${{env.ENV}}-terraform-output.json
+
+  helm:
+    name: "Deploy Helm Charts to EKS"
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+      - name: Checkout code
+        uses: action/checkout@v4
+
+      - name: Set environment variables
+        id: set_env
+        run: |
+          BRANCH=${GITHUB_REF##*/}
+          if [[ "$BRANCH" == "stag" ]]; then
+            echo "ENV=stag" >> $GITHUB_ENV
+            echo "VALUES=values.stag.yaml" >> $GITHUB_ENV
+          else
+            echo "ENV=main" >> $GITHUB_ENV
+            echo "VALUES=values.prod.yaml" >> $GITHUB_ENV
+          fi
+
+      - name: Download terraform artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{env.ENV}}-tf-output
+          path: /tmp/tf-output
+
+      - name: Extract variables from JSON
+        id: tf-vars
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const env = JSON.parse(fs.readFileSync('/tmp/tf-output/${{ env.ENV }}-terraform-output.json', 'utf8'));
+            core.exportVariable('connection_string', env.identity_connection_string.value)
+            core.exportVariable('task_connection_url', env.task_connection_url.value)
+            core.exportVariable('eks-name', env.eks-name.value)
+            core.exportVariable('aws_region', env.aws_region.value)
+
+      - name: Configure AWS credenticals
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets[format('AWS_ACCESS_KEY_ID_{0}', env.ENV)]  }}
+          aws-secret-access-key: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_{0}', env.ENV)]  }}
+          aws-region: ${{env.aws_region}}
+
+      - name: Configure kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{env.aws_region}} --name ${{ env.eks-name }}
+
+      - name: Create secret in Kubernetes
+        run: |
+          kubectl create secret generic identity-db \
+            --from-literal=connectionString=${{ env.connection_string }}
+          kubectl create secret generic task-db \
+            --from-literal=db-url=${{ env.task_connection_url }} \
+            --from-literal=db-username=${{ secrets.DB_USERNAME_TASK_SERVICE }} \
+            --from-literal=db-password=${{ secrets.DB_PASSWORD_TASK_SERVICE }}
+
+      - name: Helm upgrade/install
+        run: |
+          helm upgrade --install todolist . -f ${{env.VALUES}}
+        working-directory: ./helm

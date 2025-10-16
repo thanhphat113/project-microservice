@@ -1,5 +1,3 @@
-replicaCount: 3
-
 image:
   repository: thanhphat0/identity-service
   tag: 1.0.0
@@ -8,6 +6,8 @@ service:
   type: ClusterIP
   urls: 9001
   port: 9001
+  image:
+    pullPolicy: Always
 
 resources:
   limits:
@@ -18,6 +18,10 @@ resources:
     memory: "256Mi"
 
 env:
-  - name: ASPNETCORE_URLS
-    value: "http://+:9001"
+- name: ASPNETCORE_URLS
+  value: "http://+:9001"
 
+secretENV:
+- name: ConnectionStrings__Default
+  secretName: identity-db
+  key: connectionString
