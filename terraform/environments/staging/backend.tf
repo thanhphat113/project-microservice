@@ -1,5 +1,10 @@
 terraform {
-  backend "local" {
-    path = "terraform.tfstate"
+  cloud {
+    organization = "terraform-state-todolist"
+
+    workspaces {
+      name = "todolist-staging"
+    }
   }
+
 }
