@@ -120,7 +120,7 @@ jobs:
             const env = JSON.parse(fs.readFileSync('/tmp/tf-output/${{ env.ENV }}-terraform-output.json', 'utf8'));
             core.exportVariable('connection_string', env.identity_connection_string.value)
             core.exportVariable('task_connection_url', env.task_connection_url.value)
-            core.exportVariable('eks-name', env.eks-name.value)
+            core.exportVariable('eks-name', env["eks-name"].value)
             core.exportVariable('aws_region', env.aws_region.value)
 
       - name: Configure AWS credenticals
