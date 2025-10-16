@@ -43,11 +43,13 @@ axiosInstance.interceptors.response.use(
                 return Promise.reject(er);
             }
         }
-
+        
         const responseError = error.response?.data || {
             message: "Unexpected error",
         };
-        store.dispatch(handleErrorRequest(responseError.message));
+        if (!error.config.passError) {
+            store.dispatch(handleErrorRequest(responseError.message));
+        }
         return Promise.reject(error);
     }
 );

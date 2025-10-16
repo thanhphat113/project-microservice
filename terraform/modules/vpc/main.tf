@@ -21,11 +21,11 @@ resource "aws_subnet" "public" {
   for_each = toset(var.public_subnets)
 
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = each.key
-  availability_zone       = element(var.azs, index(var.public_subnets, each.key))
+  cidr_block              = each.value
+  availability_zone       = element(var.azs, index(var.public_subnets, each.value))
   map_public_ip_on_launch = true
 
-  tags = merge(var.tags, { Name = "${var.project}-subnet-public-${var.env}-${element(var.azs, index(var.public_subnets, each.key))}" })
+  tags = merge(var.tags, { Name = "${var.project}-subnet-public-${var.env}-${element(var.azs, index(var.public_subnets, each.value))}" })
 }
 
 resource "aws_subnet" "private" {

@@ -3,10 +3,15 @@ kind: Service
 metadata:
   name: {{ include "mychart.fullname" . }}
   namespace: {{.Values.global.namespace}}
+  annotations:
+    {{- range $key, $value := .Values.service.annotations}}
+    {{$key}}: {{$value | quote}}
+    {{- end}}
 spec:
   type: {{ .Values.service.type }}
   selector:
     app: {{ include "mychart.name" . }}
   ports:
-    - port: {{ .Values.service.urls }}
-      targetPort: {{ .Values.service.port }}
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.urls }}
+      nodePort: {{ .Values.service.nodePort }}

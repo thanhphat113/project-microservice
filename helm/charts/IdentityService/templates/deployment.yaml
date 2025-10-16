@@ -23,8 +23,17 @@ spec:
             - containerPort: {{ .Values.service.urls }}
           env:
             {{- range .Values.env}}
-              - name: {{.name}}
-                value: {{.value | quote}}
+            - name: {{.name}}
+              value: {{.value | quote}}
+            {{- end}}
+            - name: ASPNETCORE_ENVIRONMENT
+              value: {{.Values.global.env | quote}}
+            {{- range .Values.secretENV}}
+            - name: {{.name}}
+              valueFrom:
+                secretKeyRef:
+                  name: {{.secretName}}
+                  key: {{.key}}
             {{- end}}
           resources:
             limits:

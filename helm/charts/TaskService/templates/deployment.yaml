@@ -16,15 +16,22 @@ spec:
         app: {{ include "mychart.name" . }}
     spec:
       containers:
-        - name: api-gateway
+        - name: identity-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.service.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.urls }}
           env:
             {{- range .Values.env}}
               - name: {{.name}}
                 value: {{.value | quote}}
+            {{- end}}
+            {{- range .Values.secretENV}}
+              - name: {{.name}}
+                valueFrom:
+                  secretKeyRef:
+                    name: {{.secretName}}
+                    key: {{.key}}
             {{- end}}
           resources:
             limits:

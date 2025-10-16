@@ -3,6 +3,7 @@ using System.Text;
 using ApiGateway.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.HttpOverrides;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Quartz;
@@ -11,15 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
-var portFE = builder.Configuration.GetValue<string>("FRONTEND_URLS");
+var frontEndUrls = builder.Configuration.GetValue<string>("FRONTEND_URLS");
+Console.WriteLine("tôi là FRONTEND_URLS:" + frontEndUrls);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins($"http://localhost:{portFE}")
+            policy.WithOrigins(frontEndUrls)
                   .AllowAnyHeader()
                   .AllowCredentials()
                   .AllowAnyMethod();
@@ -43,7 +46,7 @@ builder.Services.AddQuartz(q =>
 
 builder.Services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"ocelot.{builder.Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT")}.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddAuthentication("Bearer")
         .AddJwtBearer("Bearer", options =>
@@ -74,6 +77,11 @@ builder.Services.AddAuthentication("Bearer")
 
 var app = builder.Build();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
+
 app.UseCors("AllowSpecificOrigins");
 
 
@@ -85,6 +93,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
 app.UseAuthentication();
 app.UseAuthorization();
