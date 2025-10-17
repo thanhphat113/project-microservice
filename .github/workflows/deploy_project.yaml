@@ -37,12 +37,8 @@ jobs:
       - name: Setup terraform
         uses: hashicorp/setup-terraform@v3
         with:
+          cli_config_credentials_token: ${{ secrets.TERRAFORM_TOKEN }}
           working-directory: ./terraform
-
-      - name: Set Terraform Cloud Token
-        run: |
-          echo "TFE_TOKEN=${{ secrets.TERRAFORM_TOKEN }}" >> $GITHUB_ENV
-        shell: bash
 
       - name: Terraform init
         run: terraform init
@@ -85,7 +81,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.DIR}}-tf-output
+          name: ${{env.ENV}}-tf-output
           path: ./terraform/environments/${{env.DIR}}/${{env.ENV}}-terraform-output.json
 
   helm:
@@ -95,7 +91,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: action/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Set environment variables
         id: set_env
@@ -123,8 +119,7 @@ jobs:
             const fs = require('fs');
             const env = JSON.parse(fs.readFileSync('/tmp/tf-output/${{ env.ENV }}-terraform-output.json', 'utf8'));
             core.exportVariable('connection_string', env.identity_connection_string.value)
-            core.exportVariable('task_connection_url', env.task_connection_url.value)
-            core.exportVariable('eks-name', env.eks-name.value)
+            core.exportVariable('eks-name', env["eks-name"].value)
             core.exportVariable('aws_region', env.aws_region.value)
 
       - name: Configure AWS credenticals
@@ -137,15 +132,6 @@ jobs:
       - name: Configure kubeconfig for EKS
         run: |
           aws eks update-kubeconfig --region ${{env.aws_region}} --name ${{ env.eks-name }}
-
-      - name: Create secret in Kubernetes
-        run: |
-          kubectl create secret generic identity-db \
-            --from-literal=connectionString=${{ env.connection_string }}
-          kubectl create secret generic task-db \
-            --from-literal=db-url=${{ env.task_connection_url }} \
-            --from-literal=db-username=${{ secrets.DB_USERNAME_TASK_SERVICE }} \
-            --from-literal=db-password=${{ secrets.DB_PASSWORD_TASK_SERVICE }}
 
       - name: Helm upgrade/install
         run: |
