@@ -1,13 +1,12 @@
-# DevOps Portfolio
+# DevOps
 
-This portfolio showcases my hands-on experience in:
+Showcasing my hands-on experience in:
 
 - **Cloud**: AWS (EKS, RDS, S3, etc)
 - **Container & Orchestration**: Docker, Kubernetes, Helm
-- **Infrastructure as Code (IaC)**: Terraform, Ansible
-- **CI/CD**: GitHub Actions, Jenkins
+- **Infrastructure as Code (IaC)**: Terraform
+- **CI/CD**: GitHub Actions
 - **Monitoring & Observability**: Prometheus, Grafana
-- **Automation / Scripting**: Bash, Python
 
 ---
 
@@ -30,8 +29,10 @@ This portfolio showcases my hands-on experience in:
 ---
 
 ## Notes
-Due to using AWS Free Tier, some workflows cannot run fully on cloud.  
-However, all scripts, manifests, and workflows are fully functional in environments with sufficient resources.
+⚠️ **Note:** This project runs on AWS Free Tier.  
+Some workflows (e.g., full EKS deployment) are limited by resource constraints,  
+but all manifests, pipelines, and IaC configurations are fully operational in real environments.
+
 
 ## Project Structure
 ```
