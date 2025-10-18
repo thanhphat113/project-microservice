@@ -13,5 +13,5 @@ spec:
     app: {{ include "mychart.name" . }}
   ports:
     - name: http
-    - port: {{ .Values.service.port }}
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.urls }}
