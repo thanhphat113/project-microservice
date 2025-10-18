@@ -12,6 +12,6 @@ spec:
   selector:
     app: {{ include "mychart.name" . }}
   ports:
-    - port: {{ .Values.service.port }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.urls }}
-      nodePort: {{ .Values.service.nodePort }}

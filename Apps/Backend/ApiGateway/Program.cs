@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 var frontEndUrls = builder.Configuration.GetValue<string>("FRONTEND_URLS");
-Console.WriteLine("tôi là FRONTEND_URLS:" + frontEndUrls);
+
 
 builder.Services.AddCors(options =>
 {
@@ -103,7 +103,6 @@ app.Use(async (context, next) =>
     if (context.User.Identity?.IsAuthenticated == true)
     {
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        Console.WriteLine("Claims: " + userId);
         if (!string.IsNullOrEmpty(userId))
         {
             context.Request.Headers["X-User-Id"] = userId;

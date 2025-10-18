@@ -7,6 +7,7 @@ using IdentityService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(cfg =>
@@ -32,12 +33,14 @@ builder.Services.AddScoped<JwtToken>();
 
 var app = builder.Build();
 
+app.UseHttpMetrics();
+app.MapMetrics();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
     db.Database.Migrate();
 }
-
 
 
 // Configure the HTTP request pipeline.
