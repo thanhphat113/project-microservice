@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 var frontEndUrls = builder.Configuration.GetValue<string>("FRONTEND_URLS");
-Console.WriteLine("tôi là FRONTEND_URLS:" + frontEndUrls);
+
 
 builder.Services.AddCors(options =>
 {

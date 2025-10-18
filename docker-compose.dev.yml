@@ -13,10 +13,10 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:${GATEWAY_URLS}
       - ASPNETCORE_ENVIRONMENT=Development
-      - FRONTEND_URLS=https://www.todolist.x10.network
+      - FRONTEND_URLS=http://localhost:3000
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_URLS}"
-    # command: "dotnet watch run --urls http://+:${GATEWAY_URLS}"
+    command: "dotnet watch run --urls http://+:${GATEWAY_URLS}"
     volumes:
       - "./Apps/Backend/ApiGateway:/src"
 
