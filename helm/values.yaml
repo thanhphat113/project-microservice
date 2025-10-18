@@ -1,33 +1,12 @@
 global:
-  namespace: todo-list-stag
-  enviroment: staging
-  defaultReplicaCount: 3
+  env: Development
+  namespace: app
 
-monitoring:
-  enabled: true
+identity-service:
+  replicaCount: 1
 
-identityService:
-  enabled: false
+task-service:
+  replicaCount: 1
 
-taskService:
-  enabled: false
-
-apiGateway:
-  enabled: true
-
-vault:
-  enabled: false
-  # replicaCount: 3 
-
-frontend:
-  enabled: false
-  replicaCount: 3 
-
-  image:
-    repository: thanhphat0/identity-service
-    tag: 1.0.0
-  
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
+api-gateway:
+  replicaCount: 1

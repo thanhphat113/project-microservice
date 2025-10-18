@@ -2,34 +2,39 @@ version: "3.8"
 
 services:
   gatewayservice:
-    build:
-      context: ./Apps/Backend/ApiGateway
-      dockerfile: Dockerfile
-      target: build
+    # build:
+    #   context: ./Apps/Backend/ApiGateway
+    #   dockerfile: Dockerfile
+    #   target: build
+    image: thanhphat0/api-gateway:1.0.0
     container_name: gateway_container
     env_file:
       - .env
     environment:
       - ASPNETCORE_URLS=http://+:${GATEWAY_URLS}
+      - ASPNETCORE_ENVIRONMENT=Development
+      - FRONTEND_URLS=http://localhost:3000
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_URLS}"
     command: "dotnet watch run --urls http://+:${GATEWAY_URLS}"
     volumes:
       - "./Apps/Backend/ApiGateway:/src"
 
-  sqlservice:
-    image: mcr.microsoft.com/azure-sql-edge
-    container_name: sqlserver_container
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
     restart: always
     env_file:
       - .env
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${SQLSERVER_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
-      - "${SQLSERVER_PORT}:1433"
+      - "${MYSQL_PORT}:3306"
     volumes:
-      - sql_data:/var/opt/mssql
+      - mysql_data:/var/lib/mysql
 
   authservice:
     build:
@@ -42,11 +47,11 @@ services:
     environment:
       - ASPNETCORE_ENV=Development
       - ASPNETCORE_URLS=http://+:${IDENTITY_URLS}
-      - ConnectionStrings__Default=Server=${SQLSERVER_SERVER},1433;Database=${SQLSERVER_DATABASE};User Id=${SQLSERVER_USER};Password=${SQLSERVER_PASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__Default=Server=${MYSQL_SERVER};Database=${MYSQL_DATABASE};User Id=${MYSQL_USER};Password=${MYSQL_PASSWORD};
     ports:
       - "${IDENTITY_PORT}:${IDENTITY_URLS}"
     depends_on:
-      - sqlservice
+      - mysql
     command: "dotnet watch run --urls http://+:${IDENTITY_URLS}"
     volumes:
       - "./Apps/Backend/IdentityService:/src"
@@ -62,8 +67,7 @@ services:
     environment:
       - TYPE_LOG=${TYPE_LOG}
       - TASK_URLS=${TASK_URLS}
-      - POSTGRESQL_SERVER=${POSTGRESQL_SERVER}
-      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - DATABASE_URL=${DATABASE_URL}
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
     ports:
@@ -91,7 +95,7 @@ services:
 
   frontend_service:
     build:
-      context: ../Apps/Frontend/Todo-frontend
+      context: ./Apps/Frontend/Todo-frontend
       dockerfile: Dockerfile
       target: build
     container_name: frontend_container
@@ -107,5 +111,5 @@ services:
       - /src/node_modules
 
 volumes:
-  sql_data:
+  mysql_data:
   postgres_data:

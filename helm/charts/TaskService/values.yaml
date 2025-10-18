@@ -1,0 +1,36 @@
+image:
+  repository: thanhphat0/task-service
+  tag: 1.0.0
+
+service:
+  type: ClusterIP
+  urls: 9002
+  port: 9002
+  image:
+    pullPolicy: Always
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+env:
+- name: TYPE_LOG
+  value: "ERROR"
+
+- name: TASK_URLS
+  value: 9002
+
+secretENV:
+- name: DATABASE_URL
+  secretName: task-db
+  key: db-url
+- name: POSTGRESQL_USERNAME
+  secretName: task-db
+  key: db-username
+- name: POSTGRESQL_PASSWORD
+  secretName: task-db
+  key: db-password

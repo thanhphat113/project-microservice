@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
 namespace IdentityService.Models;
 
@@ -20,27 +21,25 @@ public partial class IdentityDbContext : DbContext
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder
+            .UseCollation("utf8mb4_0900_ai_ci")
+            .HasCharSet("utf8mb4");
+
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Account__349DA5A6BAD6BD3F");
+            entity.HasKey(e => e.AccountId).HasName("PRIMARY");
 
             entity.ToTable("Account");
 
+            entity.HasIndex(e => e.UserId, "IX_Account_UserId");
+
             entity.HasIndex(e => e.AccountId, "UQ__Account__349DA5A7AEAE707B").IsUnique();
 
-            entity.Property(e => e.Identify)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.Provider)
-                .HasMaxLength(255)
-                .IsUnicode(false);
+            entity.Property(e => e.Identify).HasMaxLength(255);
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.Provider).HasMaxLength(255);
 
             entity.HasOne(d => d.User).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.UserId)
@@ -50,17 +49,17 @@ public partial class IdentityDbContext : DbContext
 
         modelBuilder.Entity<RefreshToken>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__tmp_ms_x__658FEEEABAD99E56");
+            entity.HasKey(e => e.TokenId).HasName("PRIMARY");
 
             entity.ToTable("RefreshToken");
+
+            entity.HasIndex(e => e.UserId, "IX_RefreshToken_UserId");
 
             entity.HasIndex(e => e.TokenId, "UQ__tmp_ms_x__658FEEEB8DC1D79C").IsUnique();
 
             entity.Property(e => e.DeviceId).HasMaxLength(50);
             entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
-            entity.Property(e => e.Token)
-                .HasMaxLength(255)
-                .IsUnicode(false);
+            entity.Property(e => e.Token).HasMaxLength(255);
 
             entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)
                 .HasForeignKey(d => d.UserId)
@@ -69,34 +68,15 @@ public partial class IdentityDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4CC3195CA0");
+            entity.HasKey(e => e.UserId).HasName("PRIMARY");
 
             entity.ToTable("User");
 
             entity.HasIndex(e => e.UserId, "UQ__User__1788CC4D882CE5A2").IsUnique();
 
-            entity.Property(e => e.Email)
-                .HasMaxLength(255)
-                .IsUnicode(false);
+            entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(255);
-
-            entity.HasData(new User
-            {
-                UserId = 1,
-                Name = "Demo",
-                Email = "demo@gmail.com"
-            });
         });
-
-        modelBuilder.Entity<Account>().HasData(new Account
-        {
-            AccountId = 1,
-            Identify = "demo@gmail.com",
-            PasswordHash = "AQAAAAIAAYagAAAAEJnHg+CIGqb8SRQcT9MpZbU11FyRYuyxzTJkDEHG9mG6rkmAaDkODwYOCVbiW+kxyw==",
-            Provider = "Local",
-            UserId = 1
-        });
-
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -1,0 +1,47 @@
+{
+    "Routes": [
+        {
+            "DownstreamPathTemplate": "/api/Auth/me",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "todolist-identity-service",
+                    "Port": 9001
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Auth/me",
+            "UpstreamHttpMethod": ["Get"],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            }
+        },
+        {
+            "DownstreamPathTemplate": "/api/Auth/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "todolist-identity-service",
+                    "Port": 9001
+                }
+            ],
+            "UpstreamPathTemplate": "/api/Auth/{everything}"
+        },
+        {
+            "DownstreamPathTemplate": "/api/tasks/{everything}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "todolist-task-service",
+                    "Port": 9002
+                }
+            ],
+            "UpstreamPathTemplate": "/api/task/{everything}",
+            "UpstreamHttpMethod": [],
+            "AuthenticationOptions": {
+                "AuthenticationProviderKey": "Bearer",
+                "AllowedScopes": []
+            }
+        }
+    ]
+}

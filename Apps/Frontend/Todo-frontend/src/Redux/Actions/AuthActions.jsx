@@ -12,7 +12,7 @@ export const authActions = {
         return response.data;
     }),
     getCurrentUser: createAsyncThunk("me", async () => {
-        const response = await axiosInstance.get(AUTH_API.ME);
+        const response = await axiosInstance.get(AUTH_API.ME,{passError : true});
         return response.data;
     }),
 };
