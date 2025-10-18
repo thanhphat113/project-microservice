@@ -1,6 +1,6 @@
 global:
   env: Development
-  namespace: default
+  namespace: app
 
 identity-service:
   replicaCount: 1

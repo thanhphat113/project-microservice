@@ -1,4 +1,4 @@
-name: CI/CD todolist
+name: CI/CD todolist-deploy
 
 on:
   push:
@@ -7,6 +7,10 @@ on:
       - main
 
 jobs:
+  build:
+    name: Build images
+    runs-on: ubuntu-latest
+
   terraform:
     name: "Run terraform for ${{matrix.environment}}"
     runs-on: ubuntu-latest

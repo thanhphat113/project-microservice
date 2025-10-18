@@ -103,7 +103,6 @@ app.Use(async (context, next) =>
     if (context.User.Identity?.IsAuthenticated == true)
     {
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        Console.WriteLine("Claims: " + userId);
         if (!string.IsNullOrEmpty(userId))
         {
             context.Request.Headers["X-User-Id"] = userId;

@@ -8,5 +8,6 @@ spec:
   selector:
     app: {{ include "mychart.name" . }}
   ports:
-    - port: {{ .Values.service.urls }}
+    - name: http
+      port: {{ .Values.service.urls }}
       targetPort: {{ .Values.service.port }}
