@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - dev
-    # paths:
-    #   - "Apps/Frontend/**"
+    paths:
+      - "Apps/Frontend/**"
 
 jobs:
   build:
