@@ -28,10 +28,14 @@ if not os.path.exists(BUILD_OUTPUT_DIR):
     print(f"Build output directory not found: {BUILD_OUTPUT_DIR}")
     sys.exit(1)
 
-print(f"--- Syncing files from {BUILD_OUTPUT_DIR} to s3://{S3_BUCKET_NAME} ---")
+output_dir_name = os.path.basename(BUILD_OUTPUT_DIR)
+
+s3_destination = f"s3://{S3_BUCKET_NAME}/{output_dir_name}"
+
+print(f"--- Syncing files from {BUILD_OUTPUT_DIR} to {s3_destination} ---")
 
 try:
-    aws_sync_command = f"aws s3 sync {BUILD_OUTPUT_DIR} s3://{S3_BUCKET_NAME} --delete"
+    aws_sync_command = f"aws s3 sync {BUILD_OUTPUT_DIR} {s3_destination} --delete"
     subprocess.run(aws_sync_command, shell=True, check=True)
     print("S3 sync successful.")
 except subprocess.CalledProcessError as e:
