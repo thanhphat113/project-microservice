@@ -40,14 +40,10 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-			
+          python-version: "3.x"
+
       - name: Install dependencies
         run: pip install boto3
 
       - name: Execute Frontend Deployment Script
-
-        run: |
-					chmod +x ./automation-scripts/python/deploy_frontend.py
-					python ./automation-scripts/python/deploy_frontend.py ${{ secrets.S3_BUCKET_NAME }}
-
+        run: python ./automation-scripts/python/deploy_frontend.py ${{ secrets.S3_BUCKET_NAME }}
